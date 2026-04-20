@@ -49,7 +49,6 @@ cd trading-dashboard
 ```bash
 python -m venv venv
 venv\Scripts\activate
-pip install -r requirements.txt
 ```
 
 ---
@@ -99,7 +98,7 @@ python price.py
 ## 6️⃣ Frontend Setup
 
 ```bash
-cd frontend
+cd training-ui
 npm install
 npm start
 ```
