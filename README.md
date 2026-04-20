@@ -38,7 +38,7 @@ WebSocket (Real-time Updates)
 ## 1️⃣ Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Lokesh2728/backend-stock-trading-.git
 cd trading-dashboard
 ```
 
