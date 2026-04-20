@@ -342,21 +342,25 @@ Frontend updates UI
 * SQLAlchemy (ORM)
 * WebSocket (Realtime)
 
----
 
-# 🎯 Future Improvements
+## 📊 Dashboard
 
-* JWT Authentication
-* Advanced Charts
-* Transaction Logs
-* Docker Deployment
+![Dashboard](images/dashboard.png)
 
 ---
 
-# 💬 Author
+## 💸 Order Panel
 
-**Lokesh Patel** 🚀
+![Orders](images/orders.png)
 
 ---
 
-⭐ If you like this project, give it a star!
+## 📈 Portfolio
+
+![Portfolio](images/portfolio.png)
+
+##  Order history
+
+![OrderHistory](images/orderhistory.png)
+
+
