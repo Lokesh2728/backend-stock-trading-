@@ -323,7 +323,7 @@ Frontend updates UI
 
 ---
 
-# ❌ Common Errors
+#  Common Errors
 
 | Error    | Cause                | Fix               |
 | -------- | -------------------- | ----------------- |
@@ -333,7 +333,7 @@ Frontend updates UI
 
 ---
 
-# 🧠 Tech Stack
+#  Tech Stack
 
 * React (Frontend)
 * FastAPI (Backend)
@@ -343,19 +343,19 @@ Frontend updates UI
 * WebSocket (Realtime)
 
 
-## 📊 Dashboard
+## Dashboard
 
 ![Dashboard](images/dashboard.png)
 
 ---
 
-## 💸 Order Panel
+##  Order Panel
 
 ![Orders](images/orders.png)
 
 ---
 
-## 📈 Portfolio
+##  Portfolio
 
 ![Portfolio](images/portfolio.png)
 
