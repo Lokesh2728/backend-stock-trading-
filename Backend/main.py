@@ -275,3 +275,8 @@ async def websocket_global(websocket: WebSocket):
 
     except Exception as e:
         print("❌ Global WS error:", e)
+
+@app.websocket("/test")
+async def test_ws(websocket: WebSocket):
+    await websocket.accept()
+    await websocket.send_text("HELLO")
