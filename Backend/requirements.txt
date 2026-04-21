@@ -1,1 +1,9 @@
-
+fastapi
+uvicorn
+sqlalchemy
+pymysql
+python-dotenv
+redis
+passlib[bcrypt]
+python-jose
+pydantic[email]
