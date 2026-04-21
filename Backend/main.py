@@ -9,7 +9,7 @@ from typing import List
 from redis_conn import redis_client
 from websocket_manager import manager
 import asyncio
-from price import update_prices
+# from price import update_prices
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,15 +17,20 @@ from decimal import Decimal
 
 app = FastAPI()
 
+# @app.on_event("startup")
+# async def startup_event():
+#     if os.getenv("ENV") == "local":
+#         asyncio.create_task(update_prices())
 @app.on_event("startup")
 async def startup_event():
-    if os.getenv("ENV") == "local":
-        asyncio.create_task(update_prices())
+    print("App started successfully 🚀")
 
 try:
     models.Base.metadata.create_all(bind=engine)
+    print("DB connected ✅")
 except Exception as e:
     print("DB ERROR:", e)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,7 +56,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
             prices = {}
             for symbol in symbols:
                 try:
-                    price = redis_client.get(f"price:{symbol}")
+                    # price = redis_client.get(f"price:{symbol}")
+                    price=100
                 except:
                     price = None
                 prices[symbol] = float(price) if price else 0
