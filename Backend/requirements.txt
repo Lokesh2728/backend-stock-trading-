@@ -7,3 +7,5 @@ redis
 passlib[bcrypt]
 python-jose
 pydantic[email]
+uvicorn[standard]
+websockets
