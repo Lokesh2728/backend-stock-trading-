@@ -39,32 +39,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: int):
-    await manager.connect(user_id, websocket)
-
-    try:
-        while True:
-            symbols = ["SBIN", "RELIANCE"]
-
-            prices = {}
-            for symbol in symbols:
-                try:
-                    price = redis_client.get(f"price:{symbol}")
-                except:
-                    price = None
-                prices[symbol] = float(price) if price else 0
-
-            await websocket.send_json({
-                "event": "price_update",
-                "data": prices
-            })
-
-            await asyncio.sleep(1)  # every second
-
-    except WebSocketDisconnect:
-        manager.disconnect(user_id)
-
 @app.post("/users", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
@@ -237,24 +211,67 @@ def get_orders(user_id: int, db: Session = Depends(get_db)):
         for o in orders
     ]
 
+@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: int):
+    await manager.connect(user_id, websocket)
+    print(f"✅ WS connected: {user_id}")
+
+    try:
+        while True:
+            symbols = ["SBIN", "RELIANCE"]
+            prices = {}
+
+            for symbol in symbols:
+                try:
+                    price = redis_client.get(f"price:{symbol}")
+                    prices[symbol] = float(price) if price else 0
+                except Exception as e:
+                    print("Redis error:", e)
+                    prices[symbol] = 0
+
+            await websocket.send_json({
+                "event": "price_update",
+                "data": prices
+            })
+
+            await asyncio.sleep(1)
+
+    except WebSocketDisconnect:
+        print(f"❌ WS disconnected: {user_id}")
+        manager.disconnect(user_id)
+
+    except Exception as e:
+        print("❌ WS error:", e)
+        manager.disconnect(user_id)
+
+
 
 @app.websocket("/ws")
 async def websocket_global(websocket: WebSocket):
     await websocket.accept()
+    print("✅ Global WS connected")
 
-    while True:
-        prices = {}
+    try:
+        while True:
+            prices = {}
 
-        for symbol in ["SBIN", "RELIANCE"]:
-            try:
-                price = redis_client.get(f"price:{symbol}")
-                prices[symbol] = float(price) if price else 0
-            except:
-                prices[symbol] = 0
+            for symbol in ["SBIN", "RELIANCE"]:
+                try:
+                    price = redis_client.get(f"price:{symbol}")
+                    prices[symbol] = float(price) if price else 0
+                except Exception as e:
+                    print("Redis error:", e)
+                    prices[symbol] = 0
 
-        await websocket.send_json({
-            "event": "price_update",
-            "data": prices
-        })
+            await websocket.send_json({
+                "event": "price_update",
+                "data": prices
+            })
 
-        await asyncio.sleep(1)
+            await asyncio.sleep(1)
+
+    except WebSocketDisconnect:
+        print("❌ Global WS disconnected")
+
+    except Exception as e:
+        print("❌ Global WS error:", e)
