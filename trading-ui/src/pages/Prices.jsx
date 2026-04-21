@@ -27,8 +27,7 @@ function Prices() {
   });
 
   return () => disconnectSocket();
-}, [userId]);
-  
+}, [userId]);  
 
   return (
     <div style={{ marginBottom: 20 }}>
