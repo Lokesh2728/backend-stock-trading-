@@ -40,4 +40,4 @@ export const disconnectSocket = () => {
 };
 
 
-new WebSocket("wss://backend-stock-trading.onrender.com/test")
+
