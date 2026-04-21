@@ -1,37 +1,34 @@
 import { useEffect, useState } from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import {LineChart,Line,XAxis,YAxis,Tooltip,CartesianGrid,} from "recharts";
+import { connectSocket, disconnectSocket } from "../socket";
 
 function Prices() {
   const [prices, setPrices] = useState({});
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/1");
+  if (!userId) return;
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+  connectSocket(userId, (msg) => {
+    if (msg.event === "price_update") {
+      const current = msg.data;
 
-      if (data.event === "price_update") {
-        const current = data.data;
-        setPrices(current);
+      setPrices(current);
 
-        // store history for chart
-        setHistory((prev) => [
-          ...prev.slice(-20), 
-          { time: new Date().toLocaleTimeString(), ...current },
-        ]);
-      }
-    };
+      // 📊 store history for chart
+      setHistory((prev) => [
+        ...prev.slice(-20),
+        {
+          time: new Date().toLocaleTimeString(),
+          ...current,
+        },
+      ]);
+    }
+  });
 
-    return () => ws.close();
-  }, []);
+  return () => disconnectSocket();
+}, [userId]);
+  
 
   return (
     <div style={{ marginBottom: 20 }}>
@@ -46,7 +43,6 @@ function Prices() {
         ))}
       </div>
 
-      {/* LINE CHART */}
       <LineChart width={600} height={300} data={history}>
         <CartesianGrid stroke="#0d0505" />
         <XAxis dataKey="time" hide />
