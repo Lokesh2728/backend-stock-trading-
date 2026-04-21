@@ -213,8 +213,10 @@ def get_orders(user_id: int, db: Session = Depends(get_db)):
 
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
+    print("🔌 WS request")
+
     await manager.connect(user_id, websocket)
-    print(f"✅ WS connected: {user_id}")
+    print("✅ WS connected")
 
     try:
         while True:
@@ -223,8 +225,19 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
 
             for symbol in symbols:
                 try:
-                    price = redis_client.get(f"price:{symbol}")
-                    prices[symbol] = float(price) if price else 0
+                    raw = redis_client.get(f"price:{symbol}")
+
+                    # ✅ SAFE CONVERSION
+                    if raw is None:
+                        price = 0
+                    else:
+                        try:
+                            price = float(raw)
+                        except:
+                            price = 0
+
+                    prices[symbol] = price
+
                 except Exception as e:
                     print("Redis error:", e)
                     prices[symbol] = 0
@@ -237,14 +250,12 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
             await asyncio.sleep(1)
 
     except WebSocketDisconnect:
-        print(f"❌ WS disconnected: {user_id}")
+        print("❌ disconnected")
         manager.disconnect(user_id)
 
     except Exception as e:
-        print("❌ WS error:", e)
+        print("❌ WS crash:", e)
         manager.disconnect(user_id)
-
-
 
 @app.websocket("/ws")
 async def websocket_global(websocket: WebSocket):
@@ -257,8 +268,18 @@ async def websocket_global(websocket: WebSocket):
 
             for symbol in ["SBIN", "RELIANCE"]:
                 try:
-                    price = redis_client.get(f"price:{symbol}")
-                    prices[symbol] = float(price) if price else 0
+                    raw = redis_client.get(f"price:{symbol}")
+
+                    if raw is None:
+                        price = 0
+                    else:
+                        try:
+                            price = float(raw)
+                        except:
+                            price = 0
+
+                    prices[symbol] = price
+
                 except Exception as e:
                     print("Redis error:", e)
                     prices[symbol] = 0
@@ -270,13 +291,5 @@ async def websocket_global(websocket: WebSocket):
 
             await asyncio.sleep(1)
 
-    except WebSocketDisconnect:
-        print("❌ Global WS disconnected")
-
     except Exception as e:
-        print("❌ Global WS error:", e)
-
-@app.websocket("/test")
-async def test_ws(websocket: WebSocket):
-    await websocket.accept()
-    await websocket.send_text("HELLO")
+        print("❌ Global WS crash:", e)
