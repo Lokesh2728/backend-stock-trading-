@@ -26,7 +26,7 @@ function Orders({ userId }) {
     fetchOrders();
 
     // 🔌 WebSocket via reusable service
-    connectSocket(userId, (data) => {
+    connectSocket(`/ws/${userId}`, (data) => {
       if (data.event === "order_executed") {
         console.log("📡 Order executed, refreshing...");
         fetchOrders();
