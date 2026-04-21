@@ -7,15 +7,12 @@ function Prices() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-  if (!userId) return;
-
-  connectSocket(userId, (msg) => {
+  connectSocket("/ws", (msg) => {
     if (msg.event === "price_update") {
       const current = msg.data;
 
       setPrices(current);
 
-      // 📊 store history for chart
       setHistory((prev) => [
         ...prev.slice(-20),
         {
@@ -27,7 +24,7 @@ function Prices() {
   });
 
   return () => disconnectSocket();
-}, [userId]);  
+}, []);
 
   return (
     <div style={{ marginBottom: 20 }}>
