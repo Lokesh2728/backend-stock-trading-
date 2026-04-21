@@ -30,6 +30,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+
+print("DB:", os.getenv("DATABASE_URL"))
+print("REDIS:", os.getenv("REDIS_URL"))
+
+
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
     await manager.connect(user_id, websocket)
