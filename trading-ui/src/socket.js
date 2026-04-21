@@ -38,3 +38,6 @@ export const connectSocket = (path, onMessage) => {
 export const disconnectSocket = () => {
   if (socket) socket.close();
 };
+
+
+new WebSocket("wss://backend-stock-trading.onrender.com/test")
