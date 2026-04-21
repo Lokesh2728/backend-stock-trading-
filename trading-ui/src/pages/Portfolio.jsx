@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import API from "../Api";
+import { connectSocket, disconnectSocket } from "../socket";
 
 function Portfolio({ userId }) {
   const [data, setData] = useState([]);
@@ -9,31 +10,30 @@ function Portfolio({ userId }) {
   useEffect(() => {
   if (!userId) return;
 
-  const fetchPortfolio = () => {
-    API.get(`/portfolio/${userId}`).then((res) => {
+  const fetchPortfolio = async () => {
+    try {
+      const res = await API.get(`/portfolio/${userId}`);
       setData(res.data.portfolio);
       setTotal(res.data.total_value);
-    });
-  };
-
-  fetchPortfolio(); 
-
-  const ws = new WebSocket(`ws://127.0.0.1:8000/ws/${userId}`);
-
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    if (
-      data.event === "price_update" ||
-      data.event === "order_executed"
-    ) {
-      fetchPortfolio();
+    } catch (err) {
+      console.error("❌ Failed to fetch portfolio", err);
     }
   };
 
-  return () => ws.close();
-}, [userId]);
+  fetchPortfolio();
 
+  // 🔌 Use reusable WebSocket
+  connectSocket(userId, (msg) => {
+    if (
+      msg.event === "price_update" ||
+      msg.event === "order_executed"
+    ) {
+      fetchPortfolio();
+    }
+  });
+
+  return () => disconnectSocket();
+}, [userId]);
 
 
 
