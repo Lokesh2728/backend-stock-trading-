@@ -23,7 +23,7 @@ function Portfolio({ userId }) {
   fetchPortfolio();
 
   // 🔌 Use reusable WebSocket
-  connectSocket(userId, (msg) => {
+  connectSocket(`/ws/${userId}`, (msg) => {
     if (
       msg.event === "price_update" ||
       msg.event === "order_executed"
