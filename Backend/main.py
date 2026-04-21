@@ -2,6 +2,7 @@ from fastapi import FastAPI,Depends, HTTPException,WebSocket,WebSocketDisconnect
 from database import engine
 import models
 import schemas
+import os
 from sqlalchemy.orm import Session
 from database import get_db
 from typing import List
@@ -18,9 +19,13 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(update_prices())
+    if os.getenv("ENV") == "local":
+        asyncio.create_task(update_prices())
 
-models.Base.metadata.create_all(bind=engine)
+try:
+    models.Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print("DB ERROR:", e)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,8 +35,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-import os
-
+print("🚀 STARTING APP")
 print("DB:", os.getenv("DATABASE_URL"))
 print("REDIS:", os.getenv("REDIS_URL"))
 
@@ -46,7 +50,10 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
 
             prices = {}
             for symbol in symbols:
-                price = redis_client.get(f"price:{symbol}")
+                try:
+                    price = redis_client.get(f"price:{symbol}")
+                except:
+                    price = None
                 prices[symbol] = float(price) if price else 0
 
             await websocket.send_json({
