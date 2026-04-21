@@ -1,39 +1,41 @@
 import { useEffect, useState } from "react";
 import API from "../Api";
+import { connectSocket, disconnectSocket } from "../socket";
 
 function Orders({ userId }) {
   const [orders, setOrders] = useState([]);
 
-  
-
   useEffect(() => {
-  if (!userId) return;
+    if (!userId) return;
 
-  const fetchOrders = () => {
-    API.get(`/orders/${userId}`).then((res) => {
-      const sorted = res.data.sort(
-        (a, b) => new Date(b.created_at) - new Date(a.created_at)
-      );
-      setOrders(sorted);
+    // 📥 Fetch Orders
+    const fetchOrders = async () => {
+      try {
+        const res = await API.get(`/orders/${userId}`);
+
+        const sorted = res.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        setOrders(sorted);
+      } catch (err) {
+        console.error("❌ Failed to fetch orders", err);
+      }
+    };
+
+    fetchOrders();
+
+    // 🔌 WebSocket via reusable service
+    connectSocket(userId, (data) => {
+      if (data.event === "order_executed") {
+        console.log("📡 Order executed, refreshing...");
+        fetchOrders();
+      }
     });
-  };
 
-  fetchOrders();
-
-  const ws = new WebSocket(`ws://127.0.0.1:8000/ws/${userId}`);
-
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-
-    if (data.event === "order_executed") {
-      fetchOrders();
-    }
-  };
-
-  return () => ws.close();
-}, [userId]);
-
-
+    // cleanup
+    return () => disconnectSocket();
+  }, [userId]);
 
   return (
     <div className="orders-container">
