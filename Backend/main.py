@@ -236,3 +236,25 @@ def get_orders(user_id: int, db: Session = Depends(get_db)):
         }
         for o in orders
     ]
+
+
+@app.websocket("/ws")
+async def websocket_global(websocket: WebSocket):
+    await websocket.accept()
+
+    while True:
+        prices = {}
+
+        for symbol in ["SBIN", "RELIANCE"]:
+            try:
+                price = redis_client.get(f"price:{symbol}")
+                prices[symbol] = float(price) if price else 0
+            except:
+                prices[symbol] = 0
+
+        await websocket.send_json({
+            "event": "price_update",
+            "data": prices
+        })
+
+        await asyncio.sleep(1)
