@@ -19,7 +19,8 @@ app = FastAPI()
 
 @app.on_event("startup")
 async def startup_event():
-    if os.getenv("ENV") == "local":
+    if os.getenv("REDIS_URL"):
+        print("Starting price updater...")
         asyncio.create_task(update_prices())
 
 
@@ -37,11 +38,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-print("🚀 STARTING APP")
-print("DB:", os.getenv("DATABASE_URL"))
-print("REDIS:", os.getenv("REDIS_URL"))
-
 
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
